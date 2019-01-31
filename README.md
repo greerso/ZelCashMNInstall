@@ -8,7 +8,11 @@ sudo bash -c "$(curl -sSL https://raw.githubusercontent.com/greerso/ZelCashMNIns
 ```
 
 
+
 BTC 1BzrkEMSF4aXBtZ19DhVf8KMPVkXjXaAPG
+
 ETH 0x0f64257fAA9E5E36428E5BbB44C9A2aE3A055577
+
 ZEC t1QCnCQstdgvZ5v3P9sZbeT9ViJd2pDfNBL
+
 ZEL t1Q7AvoPtMz9nWkm6adAeJF8GL75zjWYWLU
