@@ -196,11 +196,11 @@ daemon_running() {
     fi
 }
 
-enable_sshkeys() {
+#enable_sshkeys() {
 # did user login using sshkeys?
 # is user root user?
 # does user want to use this account to run daemon
-}
+#}
 
 pre_checks() {
 	min_ubuntu
