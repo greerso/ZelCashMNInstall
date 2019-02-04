@@ -114,9 +114,9 @@ user_in_group() {
 # infobox TEXT
 infobox() {
     BASE_LINES=10
-    WT_HEIGHT=$(echo -e "$@" | wc -l)
-    (( WT_HEIGHT=WT_HEIGHT+BASE_LINES ))
     WT_WIDTH=78
+    WT_HEIGHT=$(echo -e "$@" | wc -c)
+    (( WT_HEIGHT=($WT_HEIGHT / $WT_WIDTH) + $BASE_LINES ))
     WT_SIZE="$WT_HEIGHT $WT_WIDTH"
     TERM=ansi whiptail \
     --infobox "$@" \
@@ -128,9 +128,9 @@ infobox() {
 # msgbox TEXT
 msgbox() {
     BASE_LINES=10
-    WT_HEIGHT=$(echo -e "$@" | wc -l)
-    (( WT_HEIGHT=WT_HEIGHT+BASE_LINES ))
     WT_WIDTH=78
+    WT_HEIGHT=$(echo -e "$@" | wc -c)
+    (( WT_HEIGHT=($WT_HEIGHT / $WT_WIDTH) + $BASE_LINES ))
     WT_SIZE="$WT_HEIGHT $WT_WIDTH"
     TERM=ansi whiptail \
     --msgbox "$@" \
@@ -142,9 +142,9 @@ msgbox() {
 # inputbox TEXT
 inputbox() {
     BASE_LINES=10
-    WT_HEIGHT=$(echo -e "$@" | wc -l)
-    (( WT_HEIGHT=WT_HEIGHT+BASE_LINES ))
     WT_WIDTH=78
+    WT_HEIGHT=$(echo -e "$@" | wc -c)
+    (( WT_HEIGHT=($WT_HEIGHT / $WT_WIDTH) + $BASE_LINES ))
     WT_SIZE="$WT_HEIGHT $WT_WIDTH"
     TERM=ansi whiptail \
     --inputbox "$@" \
@@ -156,11 +156,11 @@ inputbox() {
 
 # yesnobox TEXT
 yesnobox() {
-BASE_LINES=8
-WT_HEIGHT=$(echo -e "$@" | wc -l)
-(( WT_HEIGHT=WT_HEIGHT+BASE_LINES ))
-WT_WIDTH=78
-WT_SIZE="$WT_HEIGHT $WT_WIDTH"
+    BASE_LINES=10
+    WT_WIDTH=78
+    WT_HEIGHT=$(echo -e "$@" | wc -c)
+    (( WT_HEIGHT=($WT_HEIGHT / $WT_WIDTH) + $BASE_LINES ))
+    WT_SIZE="$WT_HEIGHT $WT_WIDTH"
 TERM=ansi whiptail \
 --yesno "$@" \
 --backtitle "$WT_BACKTITLE" \
@@ -608,8 +608,13 @@ systemctl restart fail2ban
 
 # download_binaries PROJECT_NAME PROJECT_GITHUB_REPO
 download_binaries() {
-GITHUB_BIN_URL="$(curl -sSL https://api.github.com/repos/${PROJECT_GITHUB_REPO}/releases/latest | jq -r ".assets[] | select(.name | test(\"$GITHUB_BIN_SUFFIX\")) | .browser_download_url")"    
+if [[ $1 -eq 'testnet' ]]; then
+	wget -P /usr/local/bin https://zelcore.io/downloads/nodes/testnetv6/zelcash-cli -q
+    wget -P /usr/local/bin https://zelcore.io/downloads/nodes/testnetv6/zelcashd -q
+    chmod +x /usr/local/bin/zelcash* else
+    GITHUB_BIN_URL="$(curl -sSL https://api.github.com/repos/${PROJECT_GITHUB_REPO}/releases/latest | jq -r ".assets[] | select(.name | test(\"$GITHUB_BIN_SUFFIX\")) | .browser_download_url")"    
     curl -sSL "$GITHUB_BIN_URL" | tar xvz -C /usr/local/bin/
+fi
 }
 
 wallet_configs() {
@@ -969,7 +974,7 @@ msgbox "${INSTALL_STEPS[wallet_conf]}"
 LOCAL_WALLET_CONF="rpcuser=${RPCUSER}\nrpcpassword=${RPCPASSWORD} password\nrpcallowip=127.0.0.1\nserver=1\ndaemon=1\ntxindex=1\nlogtimestamps=1\nmaxconnections=256"
     text_to_copy $LOCAL_WALLET_CONF
 infobox "${INSTALL_STEPS[get_binaries]}"
-    stfu download_binaries
+    stfu download_binaries testnet
 infobox "${INSTALL_STEPS[vps_configs]}"
 SERVER_WALLET_CONF="rpcuser=${RPCUSER}\nrpcpassword=${RPCPASSWORD}\nrpcallowip=127.0.0.1\nzelnode=1\nzelnodeprivkey=${MN_PRIV_KEY}\nlisten=1\nserver=1\ndaemon=1\ntxindex=1\nlogtimestamps=1\nmaxconnections=256\nexternalip=${PUBLIC_IP}\nbind=${PUBLIC_IP}:${P2P_PORT}\ndatadir=${WALLET_LOCATION}"
     stfu wallet_configs
