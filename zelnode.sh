@@ -262,12 +262,12 @@ else
 USERNAME=$1
 fi
 USER_PASSWORD=$(inputbox "Please enter a password for '${USERNAME}'")
-adduser --gecos "" --disabled-password --quiet "$USERNAME"
-echo "$USERNAME:$USER_PASSWORD" | chpasswd
+adduser --gecos "" --disabled-password --quiet "${USERNAME}"
+echo "${USERNAME}:${USER_PASSWORD}" | chpasswd
 # Add user to sudoers
-usermod -a -G sudo "$USERNAME"
-LINUX_USER=$USERNAME
-WALLET_LOCATION="$(eval echo "~$USERNAME")/.${PROJECT_NAME}"
+usermod -a -G sudo "${USERNAME}"
+LINUX_USER=${USERNAME}
+WALLET_LOCATION="$(eval echo "~${USERNAME}")/.${PROJECT_NAME}"
 # add option to ask instead of adding to sudoers by default
 # add a loop to add more users  
 }
@@ -666,7 +666,7 @@ chmod +x ${WALLET_LOCATION}/checkblocks.sh
 fetch_params() {
 set -eu
 
-PARAMS_DIR="$HOME/.zcash-params"
+PARAMS_DIR="$WALLET_LOCATION/../.zcash-params"
 
 SPROUT_PKEY_NAME='sprout-proving.key'
 SPROUT_VKEY_NAME='sprout-verifying.key'
@@ -869,7 +869,7 @@ EOF
 
 main
 rm -f /tmp/fetch_params.lock
-exit 0
+#exit 0
 }
 
 # ------------------------------------------------------------------------------
@@ -899,7 +899,6 @@ Base server install
   - Whitelist installer ip address
  - Install and configure Fail2Ban IDS
  - Autoblock repeat offenders from public blacklist
-
 Masternode install
 - Prompted install
 - Automatically detect Client and Host ip addresses
