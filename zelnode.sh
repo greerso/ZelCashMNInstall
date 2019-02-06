@@ -113,6 +113,7 @@ user_in_group() {
 
 # infobox TEXT
 infobox() {
+	#count lines, then count characters on each line and multiply line by factor of width
     BASE_LINES=10
     WT_WIDTH=78
     WT_HEIGHT=$(echo -e "$@" | wc -c)
