@@ -16,10 +16,10 @@
 # Variables
 # ==============================================================================
 # Project Specific
-PROJECT_NAME="zelcash"
-PROJECT_GITHUB_REPO="zelcash/zelcash"
-GITHUB_BIN_SUFFIX=linux
-declare -A NODE_REQ=(
+project_name="zelcash"
+project_github_repo="zelcash/zelcash"
+github_release_keyword=linux
+declare -A node_req=(
     [basic_stake]="10000"
     [super_stake]="25000"
     [bamf_stake]="100000"
@@ -33,29 +33,29 @@ declare -A NODE_REQ=(
     [super_ssd]="150G"
     [bamf_ssd]="600G"
 	)
-RPC_PORT="17654"
-P2P_PORT="17652"
+rpc_port="17654"
+p2p_port="17652"
 #
 export NEWT_COLORS=''
-RPCUSER="${PROJECT_NAME}_$(head -c 8 /dev/urandom | base64)"
-RPCPASSWORD="$(head -c 32 /dev/urandom | base64)"
-LINUX_USER=$(who -m | awk '{print $1;}')
-LINUX_USERPW="$(head -c 32 /dev/urandom | base64)"
-PUBLIC_IP="$(dig +short myip.opendns.com @resolver1.opendns.com)"
-INTERNALIP="$(hostname -I)"
-HOSTNAME="$(cat /etc/hostname)"
-SSH_PORT=$(cat /etc/ssh/sshd_config | grep Port | awk '{print $2}')
-WALLET_LOCATION="${HOME}/.${PROJECT_NAME}"
-DAEMON_BINARY="${PROJECT_NAME}d"
-PROJECT_CLI="${PROJECT_NAME}-cli"
-PROJECT_LOGO=""
-WT_BACKTITLE="$PROJECT_NAME Masternode Installer"
-WT_TITLE="Installing the $PROJECT_NAME Masternode..."
-declare MN_ALIAS
-declare MN_PRIV_KEY
-declare COLLATERAL_OUTPUT_TXID
-declare COLLATERAL_OUTPUT_INDEX
-declare -a BASE_PKGS=(\
+rpc_user="${project_name}_$(head -c 8 /dev/urandom | base64)"
+rpc_password="$(head -c 32 /dev/urandom | base64)"
+linux_user=$(who -m | awk '{print $1;}')
+linux_user_pw="$(head -c 32 /dev/urandom | base64)"
+public_ip="$(dig +short myip.opendns.com @resolver1.opendns.com)"
+internal_ip="$(hostname -I)"
+hostname="$(cat /etc/hostname)"
+ssh_port=$(cat /etc/ssh/sshd_config | grep Port | awk '{print $2}')
+wallet_location="${HOME}/.${project_name}"
+daemon_binary="${project_name}d"
+project_cli="${project_name}-cli"
+project_logo=""
+wt_backtitle="$project_name Masternode Installer"
+wt_title="Installing the $project_name Masternode..."
+declare mn_alias
+declare mn_priv_key
+declare collateral_output_txid
+declare collateral_output_index
+declare -a base_pkgs=(\
     apt-transport-https \
     ca-certificates \
     curl \
@@ -67,7 +67,7 @@ declare -a BASE_PKGS=(\
     unzip \
     wget \
     whiptail)
-declare -a PROJECT_PKGS=(\
+declare -a project_pkgs=(\
     libboost-system-dev \
     libboost-filesystem-dev \
     libboost-chrono-dev \
@@ -111,69 +111,69 @@ user_in_group() {
     groups $1 | grep -q "\b$2\b"
 }
 
+count_lines() {
+  fmt -w "$2" <<<"$1" | wc -l
+}
+
 # infobox TEXT
 infobox() {
 	#count lines, then count characters on each line and multiply line by factor of width
-    BASE_LINES=10
-    WT_WIDTH=78
-    WT_HEIGHT=$(echo -e "$@" | wc -c)
-    (( WT_HEIGHT=($WT_HEIGHT / $WT_WIDTH) + $BASE_LINES ))
-    WT_SIZE="$WT_HEIGHT $WT_WIDTH"
+    base_lines=4
+    wt_width=72
+    wt_height=$(count_lines "$@" $wt_width)
+    wt_size="$wt_height $wt_width"
     TERM=ansi whiptail \
     --infobox "$@" \
-    --backtitle "$WT_BACKTITLE" \
-    --title "$WT_TITLE" \
-    $WT_SIZE
+    --backtitle "$wt_backtitle" \
+    --title "$wt_title" \
+    $wt_size
 }
 
 # msgbox TEXT
 msgbox() {
-    BASE_LINES=10
-    WT_WIDTH=78
-    WT_HEIGHT=$(echo -e "$@" | wc -c)
-    (( WT_HEIGHT=($WT_HEIGHT / $WT_WIDTH) + $BASE_LINES ))
-    WT_SIZE="$WT_HEIGHT $WT_WIDTH"
+    base_lines=10
+    wt_width=72
+    wt_height=$(count_lines "$@" $wt_width)
+    wt_size="$wt_height $wt_width"
     TERM=ansi whiptail \
     --msgbox "$@" \
-    --backtitle "$WT_BACKTITLE" \
-    --title "$WT_TITLE" \
-    $WT_SIZE
+    --backtitle "$wt_backtitle" \
+    --title "$wt_title" \
+    $wt_size
 }
 
 # inputbox TEXT
 inputbox() {
-    BASE_LINES=10
-    WT_WIDTH=78
-    WT_HEIGHT=$(echo -e "$@" | wc -c)
-    (( WT_HEIGHT=($WT_HEIGHT / $WT_WIDTH) + $BASE_LINES ))
-    WT_SIZE="$WT_HEIGHT $WT_WIDTH"
+    base_lines=10
+    wt_width=72
+    wt_height=$(count_lines "$@" $wt_width)
+    wt_size="$wt_height $wt_width"
     TERM=ansi whiptail \
     --inputbox "$@" \
-    --backtitle "$WT_BACKTITLE" \
-    --title "$WT_TITLE" \
+    --backtitle "$wt_backtitle" \
+    --title "$wt_title" \
     3>&1 1>&2 2>&3 \
-    $WT_SIZE
+    $wt_size
 }
 
 # yesnobox TEXT
 yesnobox() {
-    BASE_LINES=10
-    WT_WIDTH=78
-    WT_HEIGHT=$(echo -e "$@" | wc -c)
-    (( WT_HEIGHT=($WT_HEIGHT / $WT_WIDTH) + $BASE_LINES ))
-    WT_SIZE="$WT_HEIGHT $WT_WIDTH"
+    base_lines=10
+    wt_width=72
+    wt_height=$(count_lines "$@" $wt_width)
+    wt_size="$wt_height $wt_width"
 TERM=ansi whiptail \
 --yesno "$@" \
---backtitle "$WT_BACKTITLE" \
---title "$WT_TITLE" \
+--backtitle "$wt_backtitle" \
+--title "$wt_title" \
 3>&1 1>&2 2>&3 \
-$WT_SIZE
+$wt_size
 }
 
 min_ubuntu() {
-    UBUNTU_VER=$(lsb_release -rs)
-    if [[ $UBUNTU_VER < 16.04 ]]; then
-    msgbox "At least Ubuntu 16.04 is required, you have $UBUNTU_VER.  Exiting..."
+    ubuntu_ver=$(lsb_release -rs)
+    if [[ $ubuntu_ver < 16.04 ]]; then
+    msgbox "At least Ubuntu 16.04 is required, you have $ubuntu_ver.  Exiting..."
     exit 1
     fi
 }
@@ -181,14 +181,14 @@ min_ubuntu() {
 auth_sudo() {
     if [ "$(id -nu)" != "root" ]; then
     sudo -k
-    PASSWORD=$(whiptail --backtitle "$PROJECT_NAME Masternode Installer" --title "Authentication required" --passwordbox "Installing $PROJECT_NAME requires root privilege. Please authenticate to begin the installation.\n\n[sudo] Password for user $USER:" 12 50 3>&2 2>&1 1>&3-)
-    exec sudo -E -S -p '' "$0" "$@" <<< "$PASSWORD"
+    password=$(whiptail --backtitle "$project_name Masternode Installer" --title "Authentication required" --passwordbox "Installing $project_name requires root privilege. Please authenticate to begin the installation.\n\n[sudo] password for user $USER:" 12 50 3>&2 2>&1 1>&3-)
+    exec sudo -E -S -p '' "$0" "$@" <<< "$password"
     fi
 }
 
 daemon_running() {
-    if [ -n "$(pidof $DAEMON_BINARY)" ]; then
-    msgbox "The $PROJECT_NAME daemon is already running."
+    if [ -n "$(pidof $daemon_binary)" ]; then
+    msgbox "The $project_name daemon is already running."
     # what user is running the daemon
     # where is the wallet stored
     # is systemd controlling the daemon or was it started from a cron job?
@@ -215,8 +215,8 @@ apt-get -y install aptitude
 aptitude -yq3 update
 aptitude -yq3 full-upgrade
 # add an if exists to each of the following
-aptitude -yq3 install ${BASE_PKGS[@]} $@
-aptitude -yq3 install ${PROJECT_PKGS[@]}
+aptitude -yq3 install ${base_pkgs[@]} $@
+aptitude -yq3 install ${project_pkgs[@]}
 
 # Add bitcoin repo for ancient version of libdb if wallet requires.
 # stfu add-apt-repository -y ppa:bitcoin/bitcoin
@@ -227,25 +227,25 @@ aptitude -yq3 install ${PROJECT_PKGS[@]}
 }
 
 change_hostname() {
-HOSTNAME=$(hostname)
+hostname=$(hostname)
 if [ -z "$1" ]; then
-newHostname=$(inputbox "Your hostname is $HOSTNAME,  please enter a new hostname then press ok.")
+newhostname=$(inputbox "Your hostname is $hostname,  please enter a new hostname then press ok.")
 else
-newHostname="$1"
+newhostname="$1"
 fi
-sed -i "s|$Hostname|$newHostname|1" /etc/hostname
-if grep -q "$Hostname" /etc/hosts; then
-sed -i "s|$Hostname|$newHostname|1" /etc/hosts
+sed -i "s|$hostname|$newhostname|1" /etc/hostname
+if grep -q "$hostname" /etc/hosts; then
+sed -i "s|$hostname|$newhostname|1" /etc/hosts
 else
-echo "127.0.0.1 $newHostname" >> /etc/hosts
+echo "127.0.0.1 $newhostname" >> /etc/hosts
 fi
 }
 
 create_swap() {
-TOTAL_MEM=$(free -m | awk '/^Mem:/{print $2}')
-TOTAL_SWP=$(free -m | awk '/^Swap:/{print $2}')
-TOTAL_M=$(($TOTAL_MEM + $TOTAL_SWP))
-if [ $TOTAL_M -lt 4000 ]; then
+total_mem=$(free -m | awk '/^Mem:/{print $2}')
+total_swap=$(free -m | awk '/^Swap:/{print $2}')
+total_m=$(($total_mem + $total_swap))
+if [ $total_m -lt 4000 ]; then
 if ! grep -q '/swapfile' /etc/fstab ; then
 fallocate -l 4G /swapfile
 chmod 600 /swapfile
@@ -262,20 +262,20 @@ USERNAME=$(inputbox "Please enter the new user name")
 else
 USERNAME=$1
 fi
-USER_PASSWORD=$(inputbox "Please enter a password for '${USERNAME}'")
+user_password=$(inputbox "Please enter a password for '${USERNAME}'")
 adduser --gecos "" --disabled-password --quiet "${USERNAME}"
-echo "${USERNAME}:${USER_PASSWORD}" | chpasswd
+echo "${USERNAME}:${user_password}" | chpasswd
 # Add user to sudoers
 usermod -a -G sudo "${USERNAME}"
-LINUX_USER=${USERNAME}
-WALLET_LOCATION="$(eval echo "~${USERNAME}")/.${PROJECT_NAME}"
+linux_user=${USERNAME}
+wallet_location="$(eval echo "~${USERNAME}")/.${project_name}"
 # add option to ask instead of adding to sudoers by default
 # add a loop to add more users  
 }
 
 iamroot() {
-	if [ "$LINUX_USER" == "root" ]; then
-	WT_TITLE="I AM ROOT" 
+	if [ "$linux_user" == "root" ]; then
+	wt_title="I AM ROOT" 
 	if (yesnobox "You are logged into your server as root.\n\nIt is not reccomended to install and run your masternode as root. Would you like to create a normal user?"); then
 	create_user
 	fi
@@ -298,14 +298,14 @@ fi
 
 harden_ssh() {
 # Set ssh port
-SSH_PORT=$(cat /etc/ssh/sshd_config | grep Port | awk '{print $2}')
-if [ $SSH_PORT -eq 22 ] ; then
-NEW_SSH_PORT=$(inputbox "SSH is currently running on $NEW_SSH_PORT.  Botnets scan are constantly scanning this port.  Enter a new port or press enter to accept port 2222" )
+ssh_port=$(cat /etc/ssh/sshd_config | grep Port | awk '{print $2}')
+if [ $ssh_port -eq 22 ] ; then
+NEW_ssh_port=$(inputbox "SSH is currently running on $NEW_ssh_port.  Botnets scan are constantly scanning this port.  Enter a new port or press enter to accept port 2222" )
 fi
 if grep -q Port /etc/ssh/sshd_config; then
-sed -ri "s|(^(.{0,2})Port)( *)?(.*)|Port $NEW_SSH_PORT|1" /etc/ssh/sshd_config
+sed -ri "s|(^(.{0,2})Port)( *)?(.*)|Port $NEW_ssh_port|1" /etc/ssh/sshd_config
 else
-echo "Port $NEW_SSH_PORT" >> /etc/ssh/sshd_config
+echo "Port $NEW_ssh_port" >> /etc/ssh/sshd_config
 fi
 # Disable root user ssh login
 # Make sure that you have a normal user before doing this
@@ -315,62 +315,62 @@ else
 echo "PermitRootLogin no" >> /etc/ssh/sshd_config
 fi
 # Disable the use of passwords with ssh
-# Add ssh-key for remote user to LINUX_USER .ssh/allowed_keys
-if grep -q PasswordAuthentication /etc/ssh/sshd_config; then
-sed -ri "s|(^(.{0,2})PasswordAuthentication)( *)?(.*)|PasswordAuthentication no|1" /etc/ssh/sshd_config
+# Add ssh-key for remote user to linux_user .ssh/allowed_keys
+if grep -q passwordAuthentication /etc/ssh/sshd_config; then
+sed -ri "s|(^(.{0,2})passwordAuthentication)( *)?(.*)|passwordAuthentication no|1" /etc/ssh/sshd_config
 else
-echo "PasswordAuthentication no" >> /etc/ssh/sshd_config
+echo "passwordAuthentication no" >> /etc/ssh/sshd_config
 fi
 # Restart the ssh daemon
 systemctl restart sshd
 }
 
 setup_ufw() {
-    SSH_PORT=$(cat /etc/ssh/sshd_config | grep Port | awk '{print $2}')
-    ALLOWED_PORTS=[$@]
-    REMOTE_IP=$(echo -e $SSH_CLIENT | awk '{ print $1}')
+    ssh_port=$(cat /etc/ssh/sshd_config | grep Port | awk '{print $2}')
+    allowed_ports=[$@]
+    remote_ip=$(echo -e $SSH_CLIENT | awk '{ print $1}')
     
     if ! [ -f /etc/ufw/ufw.conf ]; then
         apt-get -y install ufw
     fi
     
-    # Open all outgoing ports, block all incoming ports then open port $SSH_PORT for ssh.
+    # Open all outgoing ports, block all incoming ports then open port $ssh_port for ssh.
     ufw default allow outgoing
     ufw default deny incoming
     
     # Open ports
-    ufw limit $SSH_PORT/tcp comment 'ssh port'
-    ufw allow $P2P_PORT/tcp comment 'mn p2p port'
-    ufw allow $RPC_PORT/tcp comment 'mn rpc port'
-    allow all ports from $REMOTE_IP
+    ufw limit $ssh_port/tcp comment 'ssh port'
+    ufw allow $p2p_port/tcp comment 'mn p2p port'
+    ufw allow $rpc_port/tcp comment 'mn rpc port'
+    allow all ports from $remote_ip
     # Enable the firewall
     ufw --force enable
 }
 
 setup_fail2ban() {
-REMOTE_IP=$(echo -e $SSH_CLIENT | awk '{ print $1}')
-FQDN="$(hostname -f)"
-SSH_PORT=$(cat /etc/ssh/sshd_config | grep Port | awk '{print $2}')
-JAIL_LOCAL="[blacklist]\nenabled = true\nlogpath  = /var/log/fail2ban.*\nbanaction = blacklist\nbantime  = 31536000   \; 1 year\nfindtime = 31536000   \; 1 year\nmaxretry = 10\n\n[Definition]\nloglevel = INFO\nlogtarget = /var/log/fail2ban.log\nsyslogsocket = auto\nsocket = /var/run/fail2ban/fail2ban.sock\npidfile = /var/run/fail2ban/fail2ban.pid\ndbfile = /var/lib/fail2ban/fail2ban.sqlite3\ndbpurgeage = 86400"
-JAIL_LOCAL=$(echo -e $JAIL_LOCAL)
+remote_ip=$(echo -e $SSH_CLIENT | awk '{ print $1}')
+fqdn="$(hostname -f)"
+ssh_port=$(cat /etc/ssh/sshd_config | grep Port | awk '{print $2}')
+jail_local="[blacklist]\nenabled = true\nlogpath  = /var/log/fail2ban.*\nbanaction = blacklist\nbantime  = 31536000   \; 1 year\nfindtime = 31536000   \; 1 year\nmaxretry = 10\n\n[Definition]\nloglevel = INFO\nlogtarget = /var/log/fail2ban.log\nsyslogsocket = auto\nsocket = /var/run/fail2ban/fail2ban.sock\npidfile = /var/run/fail2ban/fail2ban.pid\ndbfile = /var/lib/fail2ban/fail2ban.sqlite3\ndbpurgeage = 86400"
+jail_local=$(echo -e $jail_local)
 
 if [ ! -f /etc/fail2ban/jail.local ]; then
 apt -y install fail2ban
 cat <<EOF > /etc/fail2ban/jail.local
-$JAIL_LOCAL
+$jail_local
 EOF
 fi
 
-sed -i -e 's|ignoreip = 127.0.0.1/8|ignoreip = $REMOTE_IP|g' /etc/fail2ban/jail.local
+sed -i -e 's|ignoreip = 127.0.0.1/8|ignoreip = $remote_ip|g' /etc/fail2ban/jail.local
 # jail.local:
 # [sshd]
 # action = %(action_)s
 # smtp.py[host="host:25", user="my-account", password="my-pwd", sender="sender@example.com", dest="example@example.com", name="%(__name__)s"]
 # sed -i -e 's|destemail = root@localhost|destemail = me@myemail.com |g' /etc/fail2ban/jail.local
-# sed -i -e 's|sender = root@localhost|sender = fail2ban@$FQDN\nsendername = Fail2Ban|g' /etc/fail2ban/jail.local
+# sed -i -e 's|sender = root@localhost|sender = fail2ban@$fqdn\nsendername = Fail2Ban|g' /etc/fail2ban/jail.local
 # sed -i -e 's|mta = sendmail|mta = mail|g' /etc/fail2ban/jail.local
 sed -i -e 's|action = %(action_)s|action = %(action_mwl)s|g' /etc/fail2ban/jail.local
-sed -i -e 's|= ssh|= $SSH_PORT|g' /etc/fail2ban/jail.local
+sed -i -e 's|= ssh|= $ssh_port|g' /etc/fail2ban/jail.local
 
 #create an action for repeat offenders from mitchellkrogza/Fail2Ban-Blacklist
 
@@ -607,67 +607,67 @@ systemctl restart fail2ban
 
 }
 
-# download_binaries PROJECT_NAME PROJECT_GITHUB_REPO
+# download_binaries project_name project_github_repo
 download_binaries() {
 if [[ $1 -eq 'testnet' ]]; then
 	wget -P /usr/local/bin https://zelcore.io/downloads/nodes/testnetv6/zelcash-cli -q
     wget -P /usr/local/bin https://zelcore.io/downloads/nodes/testnetv6/zelcashd -q
     chmod +x /usr/local/bin/zelcash* else
-    GITHUB_BIN_URL="$(curl -sSL https://api.github.com/repos/${PROJECT_GITHUB_REPO}/releases/latest | jq -r ".assets[] | select(.name | test(\"$GITHUB_BIN_SUFFIX\")) | .browser_download_url")"    
-    curl -sSL "$GITHUB_BIN_URL" | tar xvz -C /usr/local/bin/
+    github_bin_url="$(curl -sSL https://api.github.com/repos/${project_github_repo}/releases/latest | jq -r ".assets[] | select(.name | test(\"$github_release_keyword\")) | .browser_download_url")"    
+    curl -sSL "$github_bin_url" | tar xvz -C /usr/local/bin/
 fi
 }
 
 wallet_configs() {
-mkdir -p $WALLET_LOCATION
-cat <<EOF > $WALLET_LOCATION/zelnode.conf
-$MASTERNODE_CONF
+mkdir -p $wallet_location
+cat <<EOF > $wallet_location/zelnode.conf
+$masternode_conf
 EOF
-SERVER_WALLET_CONF=$(echo -e $SERVER_WALLET_CONF)
-cat <<EOF > $WALLET_LOCATION/${PROJECT_NAME}.conf
-$SERVER_WALLET_CONF
+server_wallet_conf=$(echo -e $server_wallet_conf)
+cat <<EOF > $wallet_location/${project_name}.conf
+$server_wallet_conf
 EOF
-chown -R $LINUX_USER $WALLET_LOCATION
+chown -R $linux_user $wallet_location
 }
 
 daemon_service() {
-DAEMON_SERVICE=$(echo -e $DAEMON_SERVICE)
-cat <<EOF > /etc/systemd/system/$DAEMON_BINARY.service
-$DAEMON_SERVICE
+daemon_service=$(echo -e $daemon_service)
+cat <<EOF > /etc/systemd/system/$daemon_binary.service
+$daemon_service
 EOF
-chmod 755 /etc/systemd/system/$DAEMON_BINARY.service
+chmod 755 /etc/systemd/system/$daemon_binary.service
 systemctl daemon-reload
-systemctl enable $DAEMON_BINARY
-systemctl restart $DAEMON_BINARY
+systemctl enable $daemon_binary
+systemctl restart $daemon_binary
 }
 
 masternode_sync() {
 echo "Syncing Masternode..."
-until ${DAEMON_BINARY} masternode debug | grep -m 1 "Masternode successfully started"; do
+until ${daemon_binary} masternode debug | grep -m 1 "Masternode successfully started"; do
 echo "."
 sleep 3
 done
 }
 
 install_checkblocks() {
-CHECK_BLOCKS="previousBlock=$(cat WALLET_LOCATION/blockcount)\ncurrentBlock=$(${PROJECT_CLI} getblockcount)\n\n${PROJECT_CLI} getblockcount > WALLET_LOCATION/blockcount\n\nif [ "$previousBlock" == "$currentBlock" ]; then\n\nsudo systemctl restart ${DAEMON_BINARY}\n\nfi"
-CHECK_BLOCKS=$(echo -e $CHECK_BLOCKS)
-echo "%sudo ALL=NOPASSWD: /bin/systemctl restart ${DAEMON_BINARY}.service" >> /etc/sudoers
-CB_CRON="*/30 * * * * ${LINUX_USER} sudo ${WALLET_LOCATION}/checkdaemon.sh >> ${WALLET_LOCATION}/cron.log"
-cat <<EOF > $WALLET_LOCATION/checkblocks.sh
-$CHECKBLOCKS
+check_blocks="previousBlock=$(cat wallet_location/blockcount)\ncurrentBlock=$(${project_cli} getblockcount)\n\n${project_cli} getblockcount > wallet_location/blockcount\n\nif [ "$previousBlock" == "$currentBlock" ]; then\n\nsudo systemctl restart ${daemon_binary}\n\nfi"
+check_blocks=$(echo -e $check_blocks)
+echo "%sudo ALL=NOPASSWD: /bin/systemctl restart ${daemon_binary}.service" >> /etc/sudoers
+cb_cron="*/30 * * * * ${linux_user} sudo ${wallet_location}/checkdaemon.sh >> ${wallet_location}/cron.log"
+cat <<EOF > $wallet_location/checkblocks.sh
+$check_blocks
 EOF
-cat <<EOF > /etc/cron.d/${PROJECT_NAME}-checkdaemon
-$CB_CRON
+cat <<EOF > /etc/cron.d/${project_name}-checkdaemon
+$cb_cron
 EOF
-chown -R ${LINUX_USER}:${LINUX_USER} $WALLET_LOCATION
-chmod +x ${WALLET_LOCATION}/checkblocks.sh
+chown -R ${linux_user}:${linux_user} $wallet_location
+chmod +x ${wallet_location}/checkblocks.sh
 }
 
 fetch_params() {
 set -eu
 
-PARAMS_DIR="$WALLET_LOCATION/../.zcash-params"
+PARAMS_DIR="$wallet_location/../.zcash-params"
 
 SPROUT_PKEY_NAME='sprout-proving.key'
 SPROUT_VKEY_NAME='sprout-verifying.key'
@@ -888,7 +888,7 @@ pre_checks
 #  - Change SSH from port 22
 #  - Disable root logon
 #  - Require ssh-keys
-declare -a INSTALL_OPTIONS=("
+declare -a install_options=("
 Base server install
  - Create swap space for a low ram vps
  - Add a non-root user
@@ -906,9 +906,9 @@ Masternode install
 - Automatically generate RPC User and secure password.
 - Download latest version from Github API
 ")
-declare -A INSTALL_STEPS=(
+declare -A install_steps=(
     [installing]="Installing packages required for setup...\n(this could take a few minutes)"
-    [install_dependencies]="This script will walk you through the following:\n\n${INSTALL_OPTIONS}\n\nYou will need:\n- A Swing wallet with at least "${NODE_REQ[basic_stake]}" coins and to know how to copy/paste."
+    [install_dependencies]="This script will walk you through the following:\n\n${install_options}\n\nYou will need:\n- A Swing wallet with at least "${node_req[basic_stake]}" coins and to know how to copy/paste."
     [create_nodekey]="Launch the control wallet (wallet on your everyday PC, not on this VPS).\nOpen CMD.\nChange directory to the directory containing zelcash-cli.\nPaste the command\n\nzelcash-cli createzelnodekey\n\n. This will be the private key for the ZelNode, *not* your collateral/rewards Private Key."
     [choose_alias]="Choose an alias for your masternode, for example MN1, then enter it here"
     [collateral_address]="Back in the CMD window on your PC paste the following command to get a public address to send the stake to:\n\nzelcash-cli getnewaddress\n\nThe result will look similar to this \"1234567890H9sA5ArE5Y9rrrrgAfRtKLYUp\".  This will be your collateral storage and rewards payout address. This must be a transparent address (t-address).  Transfer your collateral for your desired tier of ZelNode to the address generated in Step 2. Ensure you send enough to cover any transaction fees and wait for at least 2 confirmations."
@@ -917,8 +917,8 @@ declare -A INSTALL_STEPS=(
     [mn_conf]="On the control wallet machine open %AppData%\Roaming\ZelCash\zelnode.conf and paste the string that will appear on the next screen then save and close the file.\n\nIt should look like this\nZelNode1 168.104.100.190:16125 1234567890H9sA5ArE5Y9rrrrgAfRtKLYUp 13c385119f135c215a2bef7de37b534f1ac27f4d0f23c105d8ee431f9b797105 0"
     [wallet_conf]="On the control wallet PC, open %AppData%\Roaming\ZelCash\zelcash.conf in a text editor, and paste the lines that will appear on the next screen then save and close the file"
     [get_binaries]="Installing binaries to /usr/local/bin..."
-    [vps_configs]="Creating configs in $WALLET_LOCATION..."
-    [vps_systemd]="Creating and installing the $PROJECT_NAME systemd service..."
+    [vps_configs]="Creating configs in $wallet_location..."
+    [vps_systemd]="Creating and installing the $project_name systemd service..."
     [start_mn]="Restart the control wallet.  In the CMD window paste the following command:\n\nzelcash-cli startzelnode alias false\n\nto start your Masternode.\n\nIt may take a while for your masternode to fully propagate"
 )
 # ------------------------------------------------------------------------------
@@ -926,16 +926,16 @@ declare -A INSTALL_STEPS=(
 # ==============================================================================
 # INSTALL PACKAGES
 # ==============================================================================
-msgbox "${INSTALL_STEPS[install_dependencies]}"
-WT_TITLE="Installing dependencies..."
-infobox "${INSTALL_STEPS[installing]}"
+msgbox "${install_steps[install_dependencies]}"
+wt_title="Installing dependencies..."
+infobox "${install_steps[installing]}"
 stfu install_packages
 # ------------------------------------------------------------------------------
 
 # ==============================================================================
 # CONFIGURE SERVER
 # ==============================================================================
-WT_TITLE="Server Config"
+wt_title="Server Config"
 infobox "Configuring automatic security upgrades..."
 stfu unattended-upgrades
 # change_hostname
@@ -951,52 +951,52 @@ stfu setup_fail2ban
 # ------------------------------------------------------------------------------
 
 # ==============================================================================
-WT_TITLE="Masternode Config"
+wt_title="Masternode Config"
 # ==============================================================================
-while [ -z $MN_PRIV_KEY ]; do
-MN_PRIV_KEY=$(inputbox "${INSTALL_STEPS[create_nodekey]}")
+while [ -z $mn_priv_key ]; do
+mn_priv_key=$(inputbox "${install_steps[create_nodekey]}")
 done
-while [ -z $MN_ALIAS ]; do
-MN_ALIAS=$(inputbox "${INSTALL_STEPS[choose_alias]}")
+while [ -z $mn_alias ]; do
+mn_alias=$(inputbox "${install_steps[choose_alias]}")
     # note:  --default-item is not working here.  need fix.
 done
-msgbox "${INSTALL_STEPS[collateral_address]/"MN_ALIAS"/"$MN_ALIAS"}"
-while [ -z $COLLATERAL_OUTPUT_TXID ]; do
-COLLATERAL_OUTPUT_TXID=$(inputbox "${INSTALL_STEPS[mn_outputs]}")
+msgbox "${install_steps[collateral_address]/"mn_alias"/"$mn_alias"}"
+while [ -z $collateral_output_txid ]; do
+collateral_output_txid=$(inputbox "${install_steps[mn_outputs]}")
 done
-while [ -z $COLLATERAL_OUTPUT_INDEX ]; do
-COLLATERAL_OUTPUT_INDEX=$(inputbox "${INSTALL_STEPS[mn_outputs_txin]}")
+while [ -z $collateral_output_index ]; do
+collateral_output_index=$(inputbox "${install_steps[mn_outputs_txin]}")
 done
-msgbox "${INSTALL_STEPS[mn_conf]}"
-    MASTERNODE_CONF="$MN_ALIAS $PUBLIC_IP:$P2P_PORT $MN_PRIV_KEY $COLLATERAL_OUTPUT_TXID $COLLATERAL_OUTPUT_INDEX"
-    text_to_copy $MASTERNODE_CONF
-msgbox "${INSTALL_STEPS[wallet_conf]}"
-LOCAL_WALLET_CONF="rpcuser=${RPCUSER}\nrpcpassword=${RPCPASSWORD} password\nrpcallowip=127.0.0.1\nserver=1\ndaemon=1\ntxindex=1\nlogtimestamps=1\nmaxconnections=256"
+msgbox "${install_steps[mn_conf]}"
+    masternode_conf="$mn_alias $public_ip:$p2p_port $mn_priv_key $collateral_output_txid $collateral_output_index"
+    text_to_copy $masternode_conf
+msgbox "${install_steps[wallet_conf]}"
+LOCAL_WALLET_CONF="rpc_user=${rpc_user}\nrpc_password=${rpc_password} password\nrpcallowip=127.0.0.1\nserver=1\ndaemon=1\ntxindex=1\nlogtimestamps=1\nmaxconnections=256"
     text_to_copy $LOCAL_WALLET_CONF
-infobox "${INSTALL_STEPS[get_binaries]}"
+infobox "${install_steps[get_binaries]}"
     stfu download_binaries testnet
-infobox "${INSTALL_STEPS[vps_configs]}"
-SERVER_WALLET_CONF="rpcuser=${RPCUSER}\nrpcpassword=${RPCPASSWORD}\nrpcallowip=127.0.0.1\nzelnode=1\nzelnodeprivkey=${MN_PRIV_KEY}\nlisten=1\nserver=1\ndaemon=1\ntxindex=1\nlogtimestamps=1\nmaxconnections=256\nexternalip=${PUBLIC_IP}\nbind=${PUBLIC_IP}:${P2P_PORT}\ndatadir=${WALLET_LOCATION}"
+infobox "${install_steps[vps_configs]}"
+server_wallet_conf="rpc_user=${rpc_user}\nrpc_password=${rpc_password}\nrpcallowip=127.0.0.1\nzelnode=1\nzelnodeprivkey=${mn_priv_key}\nlisten=1\nserver=1\ndaemon=1\ntxindex=1\nlogtimestamps=1\nmaxconnections=256\nexternalip=${public_ip}\nbind=${public_ip}:${p2p_port}\ndatadir=${wallet_location}"
     stfu wallet_configs
     stfu fetch_params
-infobox "${INSTALL_STEPS[vps_systemd]}"
-DAEMON_SERVICE="[Unit]\nDescription=$PROJECT_NAME daemon\nAfter=network.target\n\n[Service]\nExecStart=/usr/local/bin/$DAEMON_BINARY --daemon --shrinkdebugfile --conf=$WALLET_LOCATION/$PROJECT_NAME.conf -pid=/run/$DAEMON_BINARY/$DAEMON_BINARY.pid\nRuntimeDirectory=$DAEMON_BINARY\nUser=$LINUX_USER\nType=forking\nWorkingDirectory=$WALLET_LOCATION\nPIDFile=/run/$DAEMON_BINARY/$DAEMON_BINARY.pid\nRestart=always\nRestartSec=10\n\n[Install]\nWantedBy=multi-user.target"
+infobox "${install_steps[vps_systemd]}"
+daemon_service="[Unit]\nDescription=$project_name daemon\nAfter=network.target\n\n[Service]\nExecStart=/usr/local/bin/$daemon_binary --daemon --shrinkdebugfile --conf=$wallet_location/$project_name.conf -pid=/run/$daemon_binary/$daemon_binary.pid\nRuntimeDirectory=$daemon_binary\nUser=$linux_user\nType=forking\nWorkingDirectory=$wallet_location\nPIDFile=/run/$daemon_binary/$daemon_binary.pid\nRestart=always\nRestartSec=10\n\n[Install]\nWantedBy=multi-user.target"
     stfu daemon_service
 #    stfu install_checkblocks
-msgbox "${INSTALL_STEPS[start_mn]/"MN_ALIAS"/"$MN_ALIAS"}"
+msgbox "${install_steps[start_mn]/"mn_alias"/"$mn_alias"}"
 
 # ==============================================================================
 # Display logo
 # ==============================================================================
 clear
-echo -e "${PROJECT_LOGO}\n\nYour public ip address is ${PUBLIC_IP}\nThe ${PROJECT_NAME}.conf and zelnode.conf are located at ${WALLET_LOCATION}\nThe ${PROJECT_NAME} binaries are located in at /usr/local/bin\n\nUseful commands:\n'${PROJECT_CLI} getzelnodestatus'   #Get the status of your masternode\n'${PROJECT_CLI} --help'              #Get a list of things that ${PROJECT_CLI} can do\n'sudo systemctl stop ${DAEMON_BINARY}'    #Stop the ${PROJECT_NAME} Daemon\n'sudo systemctl start ${DAEMON_BINARY}'   #Start the ${PROJECT_NAME} Daemon\n'sudo systemctl restart ${DAEMON_BINARY}' #Restart the ${PROJECT_NAME} Daemon\n'sudo systemctl status ${DAEMON_BINARY}'  #Get the status ${PROJECT_NAME} Daemon\n\nFor a beginners quick start for linux see https://steemit.com/tutorial/@greerso/linux-cli-command-line-interface-primer-for-beginners"\n\n
-if [ "$LINUX_USER" != "$USERNAME" ]; then
+echo -e "${project_logo}\n\nYour public ip address is ${public_ip}\nThe ${project_name}.conf and zelnode.conf are located at ${wallet_location}\nThe ${project_name} binaries are located in at /usr/local/bin\n\nUseful commands:\n'${project_cli} getzelnodestatus'   #Get the status of your masternode\n'${project_cli} --help'              #Get a list of things that ${project_cli} can do\n'sudo systemctl stop ${daemon_binary}'    #Stop the ${project_name} Daemon\n'sudo systemctl start ${daemon_binary}'   #Start the ${project_name} Daemon\n'sudo systemctl restart ${daemon_binary}' #Restart the ${project_name} Daemon\n'sudo systemctl status ${daemon_binary}'  #Get the status ${project_name} Daemon\n\nFor a beginners quick start for linux see https://steemit.com/tutorial/@greerso/linux-cli-command-line-interface-primer-for-beginners"\n\n
+if [ "$linux_user" != "$USERNAME" ]; then
 echo -e "The next time that you login to this server, you should use the username $USERNAME and password created in this script and disable root ssh login"
 fi
 su "$USERNAME"
 cd ~
-${PROJECT_CLI} startzelnode local false
-${PROJECT_CLI} getzelnodestatus
+${project_cli} startzelnode local false
+${project_cli} getzelnodestatus
 #masternode_sync
 # ------------------------------------------------------------------------------
 
