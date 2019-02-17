@@ -910,7 +910,7 @@ Masternode install
 ")
 declare -A install_steps=(
     [installing]="Installing packages required for setup...\n(this could take a few minutes)"
-    [install_dependencies]="This script will walk you through the following:\n\n${install_options}\n\nYou will need:\n- A Swing wallet with at least "${node_req[basic_stake]}" coins and to know how to copy/paste."
+    [install_dependencies]="This script will walk you through the following:\n\n${install_options}\n\nYou will need:\n- A Swing wallet with at least ${node_req[basic_stake]} coins and to know how to copy/paste."
     [create_nodekey]="Launch the control wallet (wallet on your everyday PC, not on this VPS).\nOpen CMD.\nChange directory to the directory containing zelcash-cli.\nPaste the command\n\nzelcash-cli createzelnodekey\n\n. This will be the private key for the ZelNode, *not* your collateral/rewards Private Key."
     [choose_alias]="Choose an alias for your masternode, for example MN1, then enter it here"
     [collateral_address]="Back in the CMD window on your PC paste the following command to get a public address to send the stake to:\n\nzelcash-cli getnewaddress\n\nThe result will look similar to this \"1234567890H9sA5ArE5Y9rrrrgAfRtKLYUp\".  This will be your collateral storage and rewards payout address. This must be a transparent address (t-address).  Transfer your collateral for your desired tier of ZelNode to the address generated in Step 2. Ensure you send enough to cover any transaction fees and wait for at least 2 confirmations."
