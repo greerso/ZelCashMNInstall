@@ -44,7 +44,7 @@ linux_user_pw="$(head -c 32 /dev/urandom | base64)"
 public_ip="$(dig +short myip.opendns.com @resolver1.opendns.com)"
 internal_ip="$(hostname -I)"
 hostname="$(cat /etc/hostname)"
-ssh_port=$(cat /etc/ssh/sshd_config | grep Port | awk '{print $2}')
+ssh_port=$(grep -Po -m 1 '(?<=Port )[0-9]*' /etc/ssh/sshd_config)
 wallet_location="${HOME}/.${project_name}"
 daemon_binary="${project_name}d"
 project_cli="${project_name}-cli"
