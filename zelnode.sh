@@ -172,8 +172,10 @@ $wt_size
 
 min_ubuntu() {
     ubuntu_ver=$(lsb_release -rs)
-    if [[ $ubuntu_ver < 16.04 ]]; then
-    msgbox "At least Ubuntu 16.04 is required, you have $ubuntu_ver.  Exiting..."
+    ubuntu_min_ver="16.04"
+    min_ubuntu=$(bc -l <<< "$ubuntu_ver < $ubuntu_min_ver")
+    if $min_ubuntu ; then
+    msgbox "At least Ubuntu $ubuntu_min_ver is required, you have $ubuntu_ver.  Exiting..."
     exit 1
     fi
 }
@@ -181,7 +183,7 @@ min_ubuntu() {
 auth_sudo() {
     if [ "$(id -nu)" != "root" ]; then
     sudo -k
-    password=$(whiptail --backtitle "$project_name Masternode Installer" --title "Authentication required" --passwordbox "Installing $project_name requires root privilege. Please authenticate to begin the installation.\n\n[sudo] password for user $USER:" 12 50 3>&2 2>&1 1>&3-)
+    password=$(whiptail --backtitle "$project_name Masternode Installer" --title "Authentication required" --passwordbox "Installing $project_name requires root privilege. Please authenticate to begin the installation.\n[sudo] password for user $USER:" 12 50 3>&2 2>&1 1>&3-)
     exec sudo -E -S -p '' "$0" "$@" <<< "$password"
     fi
 }
