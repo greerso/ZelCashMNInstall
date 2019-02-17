@@ -300,7 +300,6 @@ fi
 
 harden_ssh() {
 # Set ssh port
-ssh_port=$(cat /etc/ssh/sshd_config | grep Port | awk '{print $2}')
 if [ $ssh_port -eq 22 ] ; then
 NEW_ssh_port=$(inputbox "SSH is currently running on $NEW_ssh_port.  Botnets scan are constantly scanning this port.  Enter a new port or press enter to accept port 2222" )
 fi
@@ -328,7 +327,6 @@ systemctl restart sshd
 }
 
 setup_ufw() {
-    ssh_port=$(cat /etc/ssh/sshd_config | grep Port | awk '{print $2}')
     allowed_ports=[$@]
     remote_ip=$(echo -e $SSH_CLIENT | awk '{ print $1}')
     
@@ -352,7 +350,6 @@ setup_ufw() {
 setup_fail2ban() {
 remote_ip=$(echo -e $SSH_CLIENT | awk '{ print $1}')
 fqdn="$(hostname -f)"
-ssh_port=$(cat /etc/ssh/sshd_config | grep Port | awk '{print $2}')
 jail_local="[blacklist]\nenabled = true\nlogpath  = /var/log/fail2ban.*\nbanaction = blacklist\nbantime  = 31536000   \; 1 year\nfindtime = 31536000   \; 1 year\nmaxretry = 10\n\n[Definition]\nloglevel = INFO\nlogtarget = /var/log/fail2ban.log\nsyslogsocket = auto\nsocket = /var/run/fail2ban/fail2ban.sock\npidfile = /var/run/fail2ban/fail2ban.pid\ndbfile = /var/lib/fail2ban/fail2ban.sqlite3\ndbpurgeage = 86400"
 jail_local=$(echo -e $jail_local)
 
