@@ -652,7 +652,7 @@ done
 }
 
 install_checkblocks() {
-check_blocks="previousBlock=$(cat wallet_location/blockcount)\ncurrentBlock=$(${project_cli} getblockcount)\n\n${project_cli} getblockcount > wallet_location/blockcount\n\nif [ "$previousBlock" == "$currentBlock" ]; then\n\nsudo systemctl restart ${daemon_binary}\n\nfi"
+check_blocks="previousBlock=$(cat wallet_location/blockcount)\ncurrentBlock=$(${project_cli} getblockcount)\n\n${project_cli} getblockcount > wallet_location/blockcount\n\nif [ $previousBlock == $currentBlock ]; then\n\nsudo systemctl restart ${daemon_binary}\n\nfi"
 check_blocks=$(echo -e $check_blocks)
 echo "%sudo ALL=NOPASSWD: /bin/systemctl restart ${daemon_binary}.service" >> /etc/sudoers
 cb_cron="*/30 * * * * ${linux_user} sudo ${wallet_location}/checkdaemon.sh >> ${wallet_location}/cron.log"
