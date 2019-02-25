@@ -875,7 +875,7 @@ rm -f /tmp/fetch_params.lock
 check_cores() {
 	cores_pass=0
 	available_cores=$(nproc)
-	if [[ ${available_cores} -ge "${req_cores}" ]]; then
+	if [[ $available_cores -ge $req_cores ]]; then
 		cores_pass=1
 	fi
 }
@@ -883,7 +883,7 @@ check_cores() {
 check_ram() {
 	ram_pass=0
 	available_ram=$(free -h)
-	if [[ ${available_ram} -ge "${req_ram}" ]]; then
+	if [[ $available_ram -ge "$req_ram ]]; then
 		ram_pass=1
 	fi
 }
@@ -904,7 +904,6 @@ check_ssd_space() {
 		ssd_space_pass=1
 	fi
 }
-
 
 node_select() {
     wt_width=72
