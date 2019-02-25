@@ -22,7 +22,7 @@ github_release_keyword=linux
 declare -A node_req=(
     [basic_stake]="10000"
     [super_stake]="25000"
-    [bamf_stake]="100000"
+    [super_stake]="100000"
     [basic_cores]="2"
     [super_cores]="4"
     [bamf_cores]="8"
@@ -872,6 +872,101 @@ rm -f /tmp/fetch_params.lock
 #exit 0
 }
 
+check_cores() {
+	cores_pass=0
+	available_cores=$(nproc)
+	if [[ ${available_cores} -ge "${req_cores}" ]]; then
+		cores_pass=1
+	fi
+}
+
+check_ram() {
+	ram_pass=0
+	available_ram=$(free -h)
+	if [[ ${available_ram} -ge "${req_ram}" ]]; then
+		ram_pass=1
+	fi
+}
+
+check_is_ssd() {
+	is_ssd_pass=0
+	physical_device=$(df -P ${HOME} | awk 'END{print $1}')
+	not_ssd=$(lsblk -dn ${physical_device} -o ROTA)
+	if [[ ! $not_ssd ]]; then
+		is_ssd_pass=1
+	fi
+}
+
+check_ssd_space() {
+	ssd_space_pass=0
+	available_ssd=$(df -Ph . | awk 'NR==2 {print $4}')
+	if [[ $available_ssd -ge $req_ssd ]]; then
+		ssd_space_pass=1
+	fi
+}
+
+
+node_select() {
+    wt_width=72
+    wt_height=12
+    wt_size="$wt_height $wt_width"
+    node_type=$(TERM=ansi whiptail \
+        --menu "Select a Zelnode Type" \
+        --backtitle "$wt_backtitle" \
+         --title "$wt_title" \
+         --ok-button "Select" \
+         --cancel-button "Quit" \
+         $wt_size \
+        "1" "Basic" \
+        "2" "Super" \
+        "3" "BAMF" \
+        3>&1 1>&2 2>&3)
+
+    exitstatus=$?
+
+    if [[ ${exitstatus} -eq 0 ]]; then
+        case ${node_type} in
+            1)
+                node_type="Basic"
+                req_stake=${node_req[basic_stake]}
+                req_cores=${node_req[basic_cores]}
+                req_ram=${node_req[basic_ram]}
+                req_ssd=${node_req[basic_ssd]}
+            ;;
+            2)
+                req_node_type="Super"
+                req_stake=${node_req[super_stake]}
+                req_cores=${node_req[super_cores]}
+                req_ram=${node_req[super_ram]}
+                req_ssd=${node_req[super_ssd]}
+            ;;
+            3)
+                node_type="BAMF"
+                req_stake=${node_req[bamf_stake]}
+                req_cores=${node_req[bamf_cores]}
+                req_ram=${node_req[bamf_ram]}
+                req_ssd=${node_req[bamf_ssd]}
+            ;;
+
+        esac
+    else
+        exit
+    fi
+
+# check stake later
+
+check_cores()
+
+check_ram()
+
+# check_is_ssd()
+# returns not ssd on Digital Ocean https://superuser.com/questions/228657/which-linux-filesystem-works-best-with-ssd/550308#550308
+# need to find another way
+
+check_ssd_space()
+
+}
+
 # ------------------------------------------------------------------------------
 
 # ==============================================================================
@@ -929,6 +1024,12 @@ msgbox "${install_steps[install_dependencies]}"
 wt_title="Installing dependencies..."
 infobox "${install_steps[installing]}"
 stfu install_packages
+# ------------------------------------------------------------------------------
+
+# ==============================================================================
+# Which ZelNode Type
+# ==============================================================================
+
 # ------------------------------------------------------------------------------
 
 # ==============================================================================
