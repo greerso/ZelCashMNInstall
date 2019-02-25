@@ -883,7 +883,7 @@ check_cores() {
 check_ram() {
 	ram_pass=0
 	available_ram=$(free -h)
-	if [[ $available_ram -ge "$req_ram ]]; then
+	if [[ $available_ram -ge $req_ram ]]; then
 		ram_pass=1
 	fi
 }
