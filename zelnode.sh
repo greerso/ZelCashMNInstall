@@ -954,15 +954,15 @@ node_select() {
 
 # check stake later
 
-check_cores()
+check_cores
 
-check_ram()
+check_ram
 
-# check_is_ssd()
+# check_is_ssd
 # returns not ssd on Digital Ocean https://superuser.com/questions/228657/which-linux-filesystem-works-best-with-ssd/550308#550308
 # need to find another way
 
-check_ssd_space()
+check_ssd_space
 
 }
 
