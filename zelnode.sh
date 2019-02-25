@@ -115,6 +115,24 @@ count_lines() {
   fmt -w "$2" <<<"$1" | wc -l
 }
 
+dehumanize() {
+  for v in "${@:-$(</dev/stdin)}"
+  do  
+    echo $v | awk \
+      'BEGIN{IGNORECASE = 1}
+       function printpower(n,b,p) {printf "%u\n", n*b^p; next}
+       /[0-9]$/{print $1;next};
+       /K(iB)?$/{printpower($1,  2, 10)};
+       /M(iB)?$/{printpower($1,  2, 20)};
+       /G(iB)?$/{printpower($1,  2, 30)};
+       /T(iB)?$/{printpower($1,  2, 40)};
+       /KB$/{    printpower($1, 10,  3)};
+       /MB$/{    printpower($1, 10,  6)};
+       /GB$/{    printpower($1, 10,  9)};
+       /TB$/{    printpower($1, 10, 12)}'
+  done
+}
+
 # infobox TEXT
 infobox() {
 	#count lines, then count characters on each line and multiply line by factor of width
@@ -882,8 +900,9 @@ check_cores() {
 
 check_ram() {
 	ram_pass=0
-	available_ram=$(free -h)
-	if [[ $available_ram -ge $req_ram ]]; then
+	req_ram_b=$(dehumanize $req_ram)
+	available_ram=$(free -b | awk '/^Mem:/{print $2}')
+	if [[ $available_ram -ge $req_ram_b ]]; then
 		ram_pass=1
 	fi
 }
@@ -900,7 +919,9 @@ check_is_ssd() {
 check_ssd_space() {
 	ssd_space_pass=0
 	available_ssd=$(df -Ph . | awk 'NR==2 {print $4}')
-	if [[ $available_ssd -ge $req_ssd ]]; then
+	available_ssd_b=$(dehumanize $available_ssd)
+	req_ssd_b=$(dehumanize $req_ssd)
+	if [[ $available_ssd_b -ge $req_ssd_b ]]; then
 		ssd_space_pass=1
 	fi
 }
